@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tennis Timeline Viewer</title>
+    <link rel="stylesheet" href="timeline.css">
+</head>
+
+<body>
+    <h1>🎾 Shot Timeline</h1>
+
+    <form id="upload-form">
+        <input type="file" id="video-file" accept="video/mp4" required />
+        <button type="submit">Upload & Analyze</button>
+    </form>
+    <p id="upload-status"></p>
+
+
+<video id="video" width="640" controls>
+  <source src="sample_video.mp4" type="video/mp4">
+</video>
+
+
+    <div id="timeline-container"></div>
+
+    <script src="timeline.js"></script>
+</body>
+
+</html>

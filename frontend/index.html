@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tennis AI">
+    
+    <title>Tennis AI - Stroke Analysis</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="tennis-ball-loader"></div>
+            <h2>Tennis AI</h2>
+            <p>Analyzing your game...</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <span class="tennis-icon">🎾</span>
+                    Tennis AI
+                </h1>
+                <div class="header-actions">
+                    <button id="info-btn" class="icon-btn" aria-label="App Info">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section id="upload-section" class="upload-section">
+                <div class="upload-container">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7,10 12,15 17,10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </div>
+                        <h2>Upload Tennis Video</h2>
+                        <p>Drop your video here or tap to select</p>
+                        <input type="file" id="video-input" accept="video/*" hidden>
+                        <button id="select-btn" class="select-btn">Select Video</button>
+                    </div>
+                    
+                    <div class="upload-tips">
+                        <h3>📱 Tips for Best Results</h3>
+                        <ul>
+                            <li>Record in landscape mode</li>
+                            <li>Keep the player in frame</li>
+                            <li>Good lighting conditions</li>
+                            <li>Stable camera position</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analysis Section -->
+            <section id="analysis-section" class="analysis-section hidden">
+                <div class="analysis-header">
+                    <button id="back-btn" class="back-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5"></path>
+                            <path d="M12 19l-7-7 7-7"></path>
+                        </svg>
+                        Back
+                    </button>
+                    <h2>Analysis Results</h2>
+                </div>
+
+                <!-- Video Player -->
+                <div class="video-container">
+                    <video id="video-player" controls playsinline>
+                        <source src="" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+                <!-- Stroke Timeline -->
+                <div class="timeline-container">
+                    <h3>Detected Strokes</h3>
+                    <div id="stroke-timeline" class="stroke-timeline">
+                        <!-- Timeline items will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Analysis Stats -->
+                <div class="stats-container">
+                    <h3>Session Summary</h3>
+                    <div class="stats-grid" id="stats-grid">
+                        <!-- Stats will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Progress Modal -->
+        <div id="progress-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="progress-container">
+                    <div class="progress-icon">
+                        <div class="tennis-ball-spinner"></div>
+                    </div>
+                    <h3>Analyzing Video</h3>
+                    <p id="progress-text">Processing frames...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-percentage" id="progress-percentage">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Modal -->
+        <div id="info-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>About Tennis AI</h3>
+                    <button id="close-info" class="close-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tennis AI uses advanced computer vision to analyze your tennis strokes and provide insights into your game.</p>
+                    <h4>Supported Strokes:</h4>
+                    <ul>
+                        <li>🏓 Forehand</li>
+                        <li>🏓 Backhand</li>
+                        <li>🎾 Serve</li>
+                    </ul>
+                    <p class="version">Version 2.0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>

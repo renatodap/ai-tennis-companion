@@ -1,0 +1,22 @@
+[
+  {
+    "stroke": "forehand",
+    "start": "frame_0006.jpg",
+    "end": "frame_0007.jpg"
+  },
+  {
+    "stroke": "backhand",
+    "start": "frame_0014.jpg",
+    "end": "frame_0015.jpg"
+  },
+  {
+    "stroke": "forehand",
+    "start": "frame_0073.jpg",
+    "end": "frame_0075.jpg"
+  },
+  {
+    "stroke": "backhand",
+    "start": "frame_0081.jpg",
+    "end": "frame_0082.jpg"
+  }
+]

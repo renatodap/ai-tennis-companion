@@ -1,0 +1,30 @@
+[
+  {
+    "stroke": "backhand",
+    "start": "frame_0000.jpg",
+    "end": "frame_0119.jpg",
+    "start_sec": 0.0,
+    "end_sec": 4.96
+  },
+  {
+    "stroke": "forehand",
+    "start": "frame_0125.jpg",
+    "end": "frame_0125.jpg",
+    "start_sec": 5.21,
+    "end_sec": 5.21
+  },
+  {
+    "stroke": "forehand",
+    "start": "frame_0129.jpg",
+    "end": "frame_0129.jpg",
+    "start_sec": 5.38,
+    "end_sec": 5.38
+  },
+  {
+    "stroke": "forehand",
+    "start": "frame_0132.jpg",
+    "end": "frame_0132.jpg",
+    "start_sec": 5.51,
+    "end_sec": 5.51
+  }
+]

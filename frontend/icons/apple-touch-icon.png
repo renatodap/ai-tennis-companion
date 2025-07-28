@@ -1,0 +1,7 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="30" fill="#1e40af"/>
+  <circle cx="90" cy="90" r="45" fill="#ffffff" opacity="0.9"/>
+  <circle cx="90" cy="90" r="30" fill="#1e40af"/>
+  <path d="M75 75 L105 105 M105 75 L75 105" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  <text x="90" y="140" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14" font-weight="bold">TENNIS AI</text>
+</svg>
