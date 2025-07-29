@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
 import os
 import asyncio
@@ -10,6 +10,7 @@ from backend.classify_strokes import classify_strokes, group_strokes
 import shutil
 import json
 import traceback
+from typing import Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -38,8 +39,15 @@ async def upload_video(file: UploadFile = File(...)):
     return JSONResponse(content={"status": "uploaded", "file": filename, "output": dummy_output})
 
 @router.post("/analyze")
-async def analyze_video(file: UploadFile = File(...)):
+async def analyze_video(file: UploadFile = File(...), config: str = Form(...)):
     logger.info(f"Starting video analysis for file: {file.filename}")
+    
+    # Parse configuration
+    try:
+        video_config = json.loads(config)
+        logger.info(f"Video configuration: {video_config}")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid configuration data")
     
     # Validate file size (50MB limit for production)
     if file.size and file.size > 50 * 1024 * 1024:
