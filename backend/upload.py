@@ -48,6 +48,32 @@ async def analyze_video(file: UploadFile = File(...), config: str = Form(...)):
         logger.info(f"Video configuration: {video_config}")
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid configuration data")
+        
+    # Validate configuration - only allow practice + side view + technique analysis
+    try:
+        # Check if all required fields exist
+        if not all(key in video_config for key in ['type', 'view', 'mode']):
+            missing_keys = [key for key in ['type', 'view', 'mode'] if key not in video_config]
+            raise HTTPException(status_code=422, 
+                               detail=f"Missing required configuration: {', '.join(missing_keys)}")
+        
+        # Check if values match the supported combination
+        if video_config['type'] != 'practice':
+            raise HTTPException(status_code=422, 
+                               detail="Only 'practice' video type is currently supported")
+            
+        if video_config['view'] != 'side':
+            raise HTTPException(status_code=422, 
+                               detail="Only 'side' camera view is currently supported")
+            
+        if video_config['mode'] != 'technique':
+            raise HTTPException(status_code=422, 
+                               detail="Only 'technique' analysis mode is currently supported")
+    except KeyError as e:
+        raise HTTPException(status_code=422, detail=f"Missing required configuration: {str(e)}")
+    except Exception as e:
+        logger.error(f"Configuration validation error: {str(e)}")
+        raise HTTPException(status_code=422, detail=f"Invalid configuration: {str(e)}")
     
     # Validate file size (50MB limit for production)
     if file.size and file.size > 50 * 1024 * 1024:

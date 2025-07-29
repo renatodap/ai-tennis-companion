@@ -164,7 +164,12 @@ class TennisAI {
                     try {
                         const errorData = await response.json();
                         if (errorData.detail) {
-                            errorMessage = errorData.detail;
+                            // Handle case where detail is an object
+                            if (typeof errorData.detail === 'object') {
+                                errorMessage = JSON.stringify(errorData.detail);
+                            } else {
+                                errorMessage = errorData.detail;
+                            }
                         }
                     } catch (e) {
                         // If we can't parse JSON, use status text
@@ -178,6 +183,10 @@ class TennisAI {
                         errorMessage = 'Video processing timed out. Please try a shorter video.';
                     } else if (response.status === 400) {
                         errorMessage = errorMessage || 'Invalid video file. Please check the file format.';
+                    } else if (response.status === 422) {
+                        errorMessage = errorMessage || 'Invalid configuration. Only Practice + Side View + Technique Analysis is supported.';
+                        // Reset the config form to ensure valid options are selected
+                        this.resetConfigForm();
                     } else if (response.status >= 500) {
                         errorMessage = 'Server error during processing. Please try again later.';
                     }
@@ -236,8 +245,16 @@ class TennisAI {
             let userMessage = 'Analysis failed. Please try again.';
             
             if (error.message) {
-                userMessage = error.message;
+                // Ensure we don't show [object Object] to users
+                if (error.message === '[object Object]' || error.message.includes('[object Object]')) {
+                    userMessage = 'Analysis failed. Please try again with a different video.';
+                } else {
+                    userMessage = error.message;
+                }
             }
+            
+            // Log the full error for debugging
+            console.error('Analysis error details:', error);
             
             // Add helpful suggestions based on error type
             if (error.message.includes('timeout') || error.message.includes('timed out')) {
@@ -246,6 +263,14 @@ class TennisAI {
                 userMessage += ' Try compressing your video or using a shorter clip.';
             } else if (error.message.includes('network') || error.message.includes('fetch')) {
                 userMessage += ' Please check your internet connection.';
+            }
+            
+            // Log the full error for debugging
+            console.error('Full error details:', error);
+            
+            // Make sure we're not displaying [object Object] to the user
+            if (userMessage === '[object Object]') {
+                userMessage = 'An error occurred during analysis. Please try again.';
             }
             
             this.showToast(userMessage, 'error');
@@ -951,24 +976,29 @@ class TennisAI {
     }
 
     resetConfigForm() {
-        // Clear all radio buttons
+        // Clear all radio buttons first
         document.querySelectorAll('input[type="radio"]').forEach(radio => {
             radio.checked = false;
         });
         
+        // Pre-select the supported configuration options
+        document.querySelector('input[name="video-type"][value="practice"]').checked = true;
+        document.querySelector('input[name="camera-view"][value="side"]').checked = true;
+        document.querySelector('input[name="analysis-mode"][value="technique"]').checked = true;
+        
         // Clear checkbox
         document.getElementById('manual-tagging').checked = false;
         
-        // Reset config state
+        // Set config state to the supported combination
         this.videoConfig = {
-            type: null,
-            view: null,
-            mode: null,
+            type: 'practice',
+            view: 'side',
+            mode: 'technique',
             manualTagging: false
         };
         
-        // Disable start button
-        document.getElementById('start-analysis-btn').disabled = true;
+        // Enable start button since we have a valid configuration
+        document.getElementById('start-analysis-btn').disabled = false;
     }
 
     showUploadSection() {

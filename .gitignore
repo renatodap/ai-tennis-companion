@@ -3,3 +3,33 @@ backend/test_data/*.mp4
 backend/test_data/frames/
 frontend/sample_video.mp4
 frontend/frames/
+
+# Python virtual environments
+venv/
+venv310/
+.env/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# VSCode settings
+.vscode/
+
+# Logs and misc
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+
+# Frontend build (if you ever use bundlers later)
+node_modules/
