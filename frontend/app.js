@@ -131,38 +131,110 @@ class TennisAI {
             // Update progress
             this.updateProgress(10, 'Uploading video...');
 
-            // Make API call
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                body: formData
-            });
+            // Make API call with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+            
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    let errorMessage = `Server error (${response.status})`;
+                    
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        // If we can't parse JSON, use status text
+                        errorMessage = response.statusText || errorMessage;
+                    }
+                    
+                    // Handle specific error codes
+                    if (response.status === 413) {
+                        errorMessage = 'Video file is too large. Please use a smaller file (under 50MB).';
+                    } else if (response.status === 408) {
+                        errorMessage = 'Video processing timed out. Please try a shorter video.';
+                    } else if (response.status === 400) {
+                        errorMessage = errorMessage || 'Invalid video file. Please check the file format.';
+                    } else if (response.status >= 500) {
+                        errorMessage = 'Server error during processing. Please try again later.';
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+
+                this.updateProgress(50, 'Processing frames...');
+
+                const data = await response.json();
+                
+                // Validate response data
+                if (!data || !data.timeline) {
+                    throw new Error('Invalid response from server');
+                }
+                
+                this.analysisData = data;
+
+                this.updateProgress(80, 'Analyzing strokes...');
+
+                // Simulate additional processing time for better UX
+                await this.sleep(1000);
+
+                this.updateProgress(100, 'Analysis complete!');
+
+                // Wait a bit before showing results
+                await this.sleep(500);
+
+                this.hideModal('progress-modal');
+                
+                // Show success message with stroke count
+                const strokeCount = data.timeline ? data.timeline.length : 0;
+                if (strokeCount > 0) {
+                    this.showToast(`Analysis complete! Found ${strokeCount} strokes.`, 'success');
+                } else {
+                    this.showToast('Analysis complete, but no strokes were detected.', 'warning');
+                }
+                
+                this.showAnalysisResults();
+                
+            } catch (fetchError) {
+                clearTimeout(timeoutId);
+                
+                if (fetchError.name === 'AbortError') {
+                    throw new Error('Request timed out. Please try a shorter video or check your connection.');
+                }
+                
+                throw fetchError;
             }
-
-            this.updateProgress(50, 'Processing frames...');
-
-            const data = await response.json();
-            this.analysisData = data;
-
-            this.updateProgress(80, 'Analyzing strokes...');
-
-            // Simulate additional processing time for better UX
-            await this.sleep(1000);
-
-            this.updateProgress(100, 'Analysis complete!');
-
-            // Wait a bit before showing results
-            await this.sleep(500);
-
-            this.hideModal('progress-modal');
-            this.showAnalysisResults();
 
         } catch (error) {
             console.error('Analysis failed:', error);
             this.hideModal('progress-modal');
-            this.showToast('Analysis failed. Please try again.', 'error');
+            
+            // Show more specific error messages
+            let userMessage = 'Analysis failed. Please try again.';
+            
+            if (error.message) {
+                userMessage = error.message;
+            }
+            
+            // Add helpful suggestions based on error type
+            if (error.message.includes('timeout') || error.message.includes('timed out')) {
+                userMessage += ' Try using a shorter video (under 30 seconds).';
+            } else if (error.message.includes('too large')) {
+                userMessage += ' Try compressing your video or using a shorter clip.';
+            } else if (error.message.includes('network') || error.message.includes('fetch')) {
+                userMessage += ' Please check your internet connection.';
+            }
+            
+            this.showToast(userMessage, 'error');
         } finally {
             this.isAnalyzing = false;
         }
