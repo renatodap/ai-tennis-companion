@@ -44,7 +44,7 @@
         <header class="header">
             <div class="header-content">
                 <h1 class="app-title">
-                    <span class="tennis-icon">🎾</span>
+                    <span class="brand-mark"></span>
                     Tennis AI
                 </h1>
                 <div class="header-actions">
@@ -74,19 +74,19 @@
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
                         </div>
-                        <h2>Upload Tennis Video</h2>
-                        <p>Drop your video here or tap to select</p>
+                        <h2>Video Analysis</h2>
+                        <p>Select a tennis video for professional analysis</p>
                         <input type="file" id="video-input" accept="video/*" hidden>
                         <button id="select-btn" class="select-btn">Select Video</button>
                     </div>
 
-                    <div class="upload-tips">
-                        <h3>📱 Tips for Best Results</h3>
+                    <div class="upload-guidelines">
+                        <h3>Recording Guidelines</h3>
                         <ul>
-                            <li>Record in landscape mode</li>
-                            <li>Keep the player in frame</li>
-                            <li>Good lighting conditions</li>
-                            <li>Stable camera position</li>
+                            <li><span>Landscape orientation recommended</span></li>
+                            <li><span>Full player visibility required</span></li>
+                            <li><span>Consistent lighting conditions</span></li>
+                            <li><span>Stable camera positioning</span></li>
                         </ul>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
                     <div class="config-form">
                         <!-- Video Type Selection -->
                         <div class="config-group">
-                            <h3>🎾 What type of video is this?</h3>
+                            <h3>Video Type</h3>
                             <div class="option-grid">
                                 <label class="option-card disabled" for="type-match">
                                     <input type="radio" id="type-match" name="video-type" value="match" disabled>
@@ -138,18 +138,17 @@
                                 </label>
                             </div>
                             <div class="config-note">
-                                📝 Currently only practice rally analysis is supported
+                                Currently only practice rally analysis is supported
                             </div>
                         </div>
 
                         <!-- Camera Angle Selection -->
                         <div class="config-group">
-                            <h3>📹 Camera viewpoint?</h3>
+                            <h3>Camera Angle</h3>
                             <div class="option-grid">
                                 <label class="option-card disabled" for="view-back">
                                     <input type="radio" id="view-back" name="camera-view" value="back" disabled>
                                     <div class="option-content">
-                                        <div class="option-icon">👤</div>
                                         <h4>Back View</h4>
                                         <p>Coming Soon</p>
                                     </div>
@@ -157,25 +156,23 @@
                                 <label class="option-card" for="view-side">
                                     <input type="radio" id="view-side" name="camera-view" value="side">
                                     <div class="option-content">
-                                        <div class="option-icon">👥</div>
                                         <h4>Side View</h4>
                                         <p>From the side of the court</p>
                                     </div>
                                 </label>
                             </div>
                             <div class="config-note">
-                                📹 Only side view analysis is currently available
+                                Side view provides optimal technique analysis
                             </div>
                         </div>
 
                         <!-- Analysis Mode Selection -->
                         <div class="config-group">
-                            <h3>🧠 Analysis focus?</h3>
+                            <h3>Analysis Focus</h3>
                             <div class="option-grid">
                                 <label class="option-card" for="mode-technique">
                                     <input type="radio" id="mode-technique" name="analysis-mode" value="technique">
                                     <div class="option-content">
-                                        <div class="option-icon">🔍</div>
                                         <h4>Technique</h4>
                                         <p>Form, posture, swing mechanics</p>
                                     </div>
@@ -183,24 +180,23 @@
                                 <label class="option-card disabled" for="mode-tactics">
                                     <input type="radio" id="mode-tactics" name="analysis-mode" value="tactics" disabled>
                                     <div class="option-content">
-                                        <div class="option-icon">📊</div>
                                         <h4>Tactics</h4>
                                         <p>Coming Soon</p>
                                     </div>
                                 </label>
                             </div>
                             <div class="config-note">
-                                🎯 Currently focused on technique analysis only
+                                Currently focused on technique analysis only
                             </div>
                         </div>
 
                         <!-- Optional Manual Tagging -->
                         <div class="config-group">
-                            <h3>🏷️ Manual assistance (optional)</h3>
+                            <h3>Manual Assistance (Optional)</h3>
                             <label class="checkbox-card" for="manual-tagging">
                                 <input type="checkbox" id="manual-tagging" name="manual-tagging">
                                 <div class="checkbox-content">
-                                    <div class="checkbox-icon">✋</div>
+                                    <div class="checkbox-icon"></div>
                                     <div class="checkbox-text">
                                         <h4>Help label events</h4>
                                         <p>Manually mark key moments for better analysis</p>
@@ -370,11 +366,11 @@
                 <div class="modal-body">
                     <p>Tennis AI uses advanced computer vision to analyze your tennis strokes and provide insights into
                         your game.</p>
-                    <h4>Supported Strokes:</h4>
+                    <h4>Supported Analysis:</h4>
                     <ul>
-                        <li>🏓 Forehand</li>
-                        <li>🏓 Backhand</li>
-                        <li>🎾 Serve</li>
+                        <li>Forehand technique</li>
+                        <li>Backhand technique</li>
+                        <li>Serve mechanics</li>
                     </ul>
                     <p class="version">Version 2.0</p>
                 </div>
