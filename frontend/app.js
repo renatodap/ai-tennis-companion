@@ -913,6 +913,20 @@ class TennisAI {
         this.videoConfig.type = videoType ? videoType.value : null;
         this.videoConfig.view = cameraView ? cameraView.value : null;
         this.videoConfig.mode = analysisMode ? analysisMode.value : null;
+        
+        // Check if user selected supported combination
+        const isValidCombination = this.videoConfig.type === 'practice' && 
+                                  this.videoConfig.view === 'side' && 
+                                  this.videoConfig.mode === 'technique';
+        
+        const hasAllSelections = this.videoConfig.type && this.videoConfig.view && this.videoConfig.mode;
+        
+        // Show warning if invalid combination is selected
+        if (hasAllSelections && !isValidCombination) {
+            this.showToast('Only Practice + Side View + Technique Analysis is currently supported', 'warning');
+        }
+        
+        this.validateConfigForm();
     }
 
     validateConfigForm() {
@@ -922,7 +936,10 @@ class TennisAI {
     }
 
     isConfigValid() {
-        return this.videoConfig.type && this.videoConfig.view && this.videoConfig.mode;
+        // Only allow the supported combination
+        return this.videoConfig.type === 'practice' && 
+               this.videoConfig.view === 'side' && 
+               this.videoConfig.mode === 'technique';
     }
 
     showConfigSection() {
