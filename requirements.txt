@@ -29,9 +29,9 @@ imageio>=2.30.0
 imageio-ffmpeg>=0.4.0
 
 # AI & Natural Language
-openai==1.3.7  # GPT-4 for insights & coaching
-langchain==0.0.350  # LLM orchestration
-langchain-openai==0.0.2
+openai>=1.6.1,<2.0.0  # GPT-4 for insights & coaching (compatible with langchain-openai)
+langchain>=0.0.350  # Structured prompts
+langchain-openai>=0.0.2  # OpenAI integration
 langchain-community==0.0.10
 
 # Data Storage & Management
