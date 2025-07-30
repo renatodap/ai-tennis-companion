@@ -7,12 +7,14 @@
     
     <!-- PWA Meta Tags -->
     <meta name="description" content="Professional tennis analysis with AI-powered insights">
-    <meta name="theme-color" content="#1d1d1f">
+    <link rel="stylesheet" href="tennisviz-styles.css">
+    <link rel="stylesheet" href="tennis-iq-styles.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a365d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TennisViz">
     
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     
     <!-- Favicon -->
@@ -853,6 +855,11 @@
                     <div class="recommendations" id="recommendations"></div>
                 </div>
                 
+                <!-- Tennis IQ Score -->
+                <div class="tennis-iq-section" id="tennisIQSection">
+                    <div id="tennisIQDisplay"></div>
+                </div>
+                
                 <!-- Advanced Analytics Toggle -->
                 <div class="advanced-toggle">
                     <button class="advanced-toggle-btn" id="advancedToggleBtn">
@@ -947,6 +954,7 @@
     <script src="heatmap-visualizer.js"></script>
     <script src="stroke-replay-animator.js"></script>
     <script src="pattern-search-engine.js"></script>
+    <script src="tennis-iq-display.js"></script>
     <script src="tennisviz-app.js"></script>
 </body>
 </html>

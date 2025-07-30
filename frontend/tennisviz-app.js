@@ -5,11 +5,11 @@ class TennisVizApp {
         this.isAnalyzing = false;
         this.advancedMode = false;
         
-        // Advanced components
-        this.heatmapVisualizer = null;
-        this.strokeReplayAnimator = null;
-        this.patternSearchEngine = null;
-        
+        // Initialize advanced components
+        this.heatmapVisualizer = new TennisCourtHeatmap('heatmapCanvas');
+        this.strokeReplayAnimator = new StrokeReplayAnimator('replayCanvas');
+        this.patternSearchEngine = new TennisPatternSearchEngine('patternSearchContainer');
+        this.tennisIQDisplay = new TennisIQDisplay('tennisIQDisplay');
         this.selectedFile = null;
         this.sessionType = 'practice';
         this.cameraView = 'side_view';
@@ -187,6 +187,12 @@ class TennisVizApp {
         this.renderTimeline(results.timeline);
         this.renderAnalytics(results.analytics);
         this.renderAIInsights(results.ai_insights);
+        
+        // Display Tennis IQ Score - The Game Changer!
+        if (results.tennis_iq) {
+            this.tennisIQDisplay.displayTennisIQ(results.tennis_iq);
+            document.getElementById('tennisIQSection').classList.add('show');
+        }
         
         setTimeout(() => {
             document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });

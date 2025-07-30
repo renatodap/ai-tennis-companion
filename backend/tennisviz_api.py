@@ -95,6 +95,37 @@ async def health_check():
         }
     }
 
+@app.post("/api/analyze")
+async def analyze_video_legacy(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    config: str = Form("{}")
+):
+    """
+    🎾 Legacy analysis endpoint for compatibility
+    Redirects to main TennisViz analysis with default settings
+    """
+    # Parse config if provided
+    import json
+    try:
+        config_data = json.loads(config) if config else {}
+    except:
+        config_data = {}
+    
+    # Use default settings for legacy calls
+    session_type = config_data.get('session_type', 'practice')
+    camera_view = config_data.get('camera_view', 'side_view')
+    analysis_mode = config_data.get('analysis_mode', 'technique')
+    
+    # Call main analysis function
+    return await analyze_tennis_video(
+        background_tasks=background_tasks,
+        video=file,
+        session_type=session_type,
+        camera_view=camera_view,
+        analysis_mode=analysis_mode
+    )
+
 @app.post("/api/analyze-tennisviz")
 async def analyze_tennis_video(
     background_tasks: BackgroundTasks,

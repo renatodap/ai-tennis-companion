@@ -128,14 +128,17 @@ class TennisVizAnalyzer:
             
             # Phase 5: Advanced analytics
             logger.info("📊 Phase 5: Advanced analytics")
-            from analytics.advanced_analytics import AdvancedAnalyticsEngine
-            from analytics.ai_coach import AICoach
-            from analytics.serve_analyzer import ServeAnalyzer, TossAnalyzer
+            from .analytics.advanced_analytics import AdvancedAnalyticsOrchestrator
+            from .analytics.ai_coach import AITennisCoach
+            from .analytics.serve_analyzer import ServeAnalyzer
+            from .analytics.tennis_iq_calculator import TennisIQCalculator
+            from .analytics.serve_analyzer import TossAnalyzer
             
             # Initialize analytics engines
-            advanced_analytics = AdvancedAnalyticsEngine()
-            ai_coach = AICoach()
+            advanced_analytics = AdvancedAnalyticsOrchestrator()
+            ai_coach = AITennisCoach()
             serve_analyzer = ServeAnalyzer()
+            tennis_iq_calculator = TennisIQCalculator()
             toss_analyzer = TossAnalyzer()
             
             # Convert stroke events to dictionaries for analytics
@@ -146,6 +149,37 @@ class TennisVizAnalyzer:
             
             # Generate AI insights
             ai_insights = await ai_coach.generate_insights(stroke_dicts, analytics, session_metadata)
+            
+            # Generate Tennis IQ score
+            tennis_iq_components, tennis_iq_insights = tennis_iq_calculator.calculate_tennis_iq(
+                stroke_dicts, analytics, session_metadata
+            )
+            
+            tennis_iq_data = {
+                'components': {
+                    'technical_skill': tennis_iq_components.technical_skill,
+                    'tactical_intelligence': tennis_iq_components.tactical_intelligence,
+                    'mental_toughness': tennis_iq_components.mental_toughness,
+                    'physical_attributes': tennis_iq_components.physical_attributes,
+                    'match_intelligence': tennis_iq_components.match_intelligence,
+                    'total_score': tennis_iq_components.total_score,
+                    'level': {
+                        'name': tennis_iq_components.level.value[0],
+                        'min_score': tennis_iq_components.level.value[1],
+                        'max_score': tennis_iq_components.level.value[2],
+                        'emoji': tennis_iq_components.level.value[3]
+                    }
+                },
+                'insights': {
+                    'strengths': tennis_iq_insights.strengths,
+                    'weaknesses': tennis_iq_insights.weaknesses,
+                    'improvement_areas': tennis_iq_insights.improvement_areas,
+                    'next_level_requirements': tennis_iq_insights.next_level_requirements,
+                    'comparison_to_pros': tennis_iq_insights.comparison_to_pros,
+                    'achievement_unlocked': tennis_iq_insights.achievement_unlocked,
+                    'motivational_message': tennis_iq_insights.motivational_message
+                }
+            }
             
             # Generate serve-specific analysis if applicable
             serve_analysis = {}
@@ -161,6 +195,7 @@ class TennisVizAnalyzer:
                 'stroke_events': stroke_dicts,
                 'analytics': analytics,
                 'ai_insights': ai_insights,
+                'tennis_iq': tennis_iq_data,
                 'serve_analysis': serve_analysis,
                 'processing_time': time.time() - session_metadata['timestamp'],
                 'summary': {
