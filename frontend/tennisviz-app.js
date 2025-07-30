@@ -249,37 +249,58 @@ class TennisVizApp {
     }
     
     async startAnalysis() {
-        if (!this.selectedFile) return;
+        if (!this.selectedFile) {
+            this.showNotification('Please select a video file first!', 'error');
+            return;
+        }
         
-        document.getElementById('loadingOverlay').classList.add('show');
+        console.log('🎾 Starting analysis with file:', this.selectedFile.name);
+        
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+        }
         
         try {
+            // Step 1: Upload the video file
+            console.log('📤 Uploading video...');
             const formData = new FormData();
-            formData.append('video', this.selectedFile);
+            formData.append('file', this.selectedFile);  // Changed from 'video' to 'file'
             formData.append('session_type', this.sessionType);
             formData.append('camera_view', this.cameraView);
             formData.append('analysis_mode', this.analysisMode);
             
-            const response = await fetch('/api/analyze-tennisviz', {
+            const uploadResponse = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             });
             
-            if (!response.ok) {
-                throw new Error(`Analysis failed: ${response.statusText}`);
+            console.log('📤 Upload response status:', uploadResponse.status);
+            
+            if (!uploadResponse.ok) {
+                throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
             }
             
-            const results = await response.json();
-            this.currentResults = results;
-            this.displayResults(results);
+            const uploadResults = await uploadResponse.json();
+            console.log('✅ Upload successful:', uploadResults);
+            
+            // Step 2: Start analysis (optional separate call)
+            console.log('🔍 Starting analysis...');
+            
+            // For now, use the upload results directly since our local server
+            // returns mock analysis data in the upload response
+            this.currentResults = uploadResults;
+            this.displayResults(uploadResults);
             
             this.showNotification('Analysis complete! 🎾', 'success');
             
         } catch (error) {
-            console.error('Analysis failed:', error);
+            console.error('❌ Analysis failed:', error);
             this.showNotification(`Analysis failed: ${error.message}`, 'error');
         } finally {
-            document.getElementById('loadingOverlay').classList.remove('show');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
         }
     }
     
