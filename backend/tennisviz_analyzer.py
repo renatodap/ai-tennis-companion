@@ -128,21 +128,51 @@ class TennisVizAnalyzer:
             
             # Phase 5: Advanced analytics
             logger.info("📊 Phase 5: Advanced analytics")
-            analytics = await self._generate_analytics(stroke_events, session_type)
+            from analytics.advanced_analytics import AdvancedAnalyticsEngine
+            from analytics.ai_coach import AICoach
+            from analytics.serve_analyzer import ServeAnalyzer, TossAnalyzer
             
-            results = {
+            # Initialize analytics engines
+            advanced_analytics = AdvancedAnalyticsEngine()
+            ai_coach = AICoach()
+            serve_analyzer = ServeAnalyzer()
+            toss_analyzer = TossAnalyzer()
+            
+            # Convert stroke events to dictionaries for analytics
+            stroke_dicts = [asdict(event) for event in stroke_events]
+            
+            # Generate comprehensive analytics
+            analytics = await advanced_analytics.generate_comprehensive_analytics(stroke_dicts, court_info)
+            
+            # Generate AI insights
+            ai_insights = await ai_coach.generate_insights(stroke_dicts, analytics, session_metadata)
+            
+            # Generate serve-specific analysis if applicable
+            serve_analysis = {}
+            if session_type == SessionType.SERVE or any(event.stroke_type == StrokeType.SERVE for event in stroke_events):
+                serve_analysis = await serve_analyzer.analyze_serves(stroke_dicts, court_info)
+                toss_analysis = await toss_analyzer.analyze_toss_consistency(stroke_dicts)
+                serve_analysis['toss_analysis'] = toss_analysis
+            
+            logger.info(f"✅ Analysis complete: {len(stroke_events)} strokes detected")
+            
+            return {
                 'session_metadata': session_metadata,
-                'timeline': [asdict(stroke) for stroke in stroke_events],
-                'court_info': court_info,
+                'stroke_events': stroke_dicts,
                 'analytics': analytics,
-                'processing_time': time.time() - session_metadata['timestamp']
+                'ai_insights': ai_insights,
+                'serve_analysis': serve_analysis,
+                'processing_time': time.time() - session_metadata['timestamp'],
+                'summary': {
+                    'total_strokes': len(stroke_events),
+                    'session_duration': stroke_events[-1].end_time - stroke_events[0].start_time if stroke_events else 0,
+                    'dominant_stroke': max(set(event.stroke_type.value for event in stroke_events), key=[event.stroke_type.value for event in stroke_events].count) if stroke_events else 'none',
+                    'average_confidence': sum(event.confidence for event in stroke_events) / len(stroke_events) if stroke_events else 0
+                }
             }
             
-            logger.info(f"✅ Analysis complete! {len(stroke_events)} strokes detected")
-            return results
-            
         except Exception as e:
-            logger.error(f"❌ Analysis failed: {str(e)}")
+            logger.error(f"Analysis failed: {e}")
             raise
     
     async def _extract_pose_data(self, video_path: str) -> List[Dict]:

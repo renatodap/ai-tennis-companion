@@ -1,6 +1,15 @@
-// 🎾 TENNISVIZ PWA JAVASCRIPT - Elite Tennis Analytics
+// 🎾 TENNISVIZ PWA// TennisViz PWA - Enhanced Tennis Analytics
 class TennisVizApp {
     constructor() {
+        this.currentAnalysis = null;
+        this.isAnalyzing = false;
+        this.advancedMode = false;
+        
+        // Advanced components
+        this.heatmapVisualizer = null;
+        this.strokeReplayAnimator = null;
+        this.patternSearchEngine = null;
+        
         this.selectedFile = null;
         this.sessionType = 'practice';
         this.cameraView = 'side_view';
@@ -9,6 +18,10 @@ class TennisVizApp {
         this.timeline = null;
         this.isPlaying = false;
         
+        this.init();
+    }
+    
+    init() {
         this.initializeEventListeners();
         this.initializeServiceWorker();
     }
@@ -36,11 +49,30 @@ class TennisVizApp {
         });
         
         // Analyze button
-        document.getElementById('analyzeBtn').addEventListener('click', this.startAnalysis.bind(this));
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        analyzeBtn.addEventListener('click', this.startAnalysis.bind(this));
+        
+        // Export button
+        const exportBtn = document.getElementById('exportBtn');
+        exportBtn.addEventListener('click', this.exportResults.bind(this));
+        
+        // Advanced analytics toggle
+        const advancedToggleBtn = document.getElementById('advancedToggleBtn');
+        if (advancedToggleBtn) {
+            advancedToggleBtn.addEventListener('click', this.toggleAdvancedAnalytics.bind(this));
+        }
+        
+        // Initialize advanced components when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            this.initializeAdvancedComponents();
+        });
+        
+        // Listen for search results
+        document.addEventListener('tennisSearchResults', this.handleSearchResults.bind(this));
+        document.getElementById('exportBtn').addEventListener('click', this.exportResults.bind(this));
         
         // Timeline controls
         document.getElementById('playBtn').addEventListener('click', this.togglePlayback.bind(this));
-        document.getElementById('exportBtn').addEventListener('click', this.exportResults.bind(this));
     }
     
     async initializeServiceWorker() {
@@ -260,20 +292,215 @@ class TennisVizApp {
     }
     
     exportResults() {
-        if (!this.currentResults) return;
+        if (!this.currentResults) {
+            this.showNotification('No analysis results to export', 'warning');
+            return;
+        }
         
         const dataStr = JSON.stringify(this.currentResults, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
         
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
-        link.download = `tennisviz-analysis-${new Date().toISOString().split('T')[0]}.json`;
-        
-        document.body.appendChild(link);
+        link.download = `tennis-analysis-${new Date().toISOString().split('T')[0]}.json`;
         link.click();
-        document.body.removeChild(link);
         
-        this.showNotification('Analysis exported! 📤', 'success');
+        this.showNotification('Analysis results exported successfully!', 'success');
+    }
+    
+    // Advanced Analytics Methods
+    initializeAdvancedComponents() {
+        // Initialize Pattern Search Engine
+        this.patternSearchEngine = new TennisPatternSearchEngine();
+        const searchContainer = document.getElementById('patternSearchContainer');
+        if (searchContainer) {
+            searchContainer.appendChild(this.patternSearchEngine.createSearchInterface());
+            this.patternSearchEngine.bindEvents();
+        }
+        
+        // Initialize Heatmap Visualizer
+        const heatmapContainer = document.getElementById('courtHeatmap');
+        if (heatmapContainer) {
+            this.heatmapVisualizer = new TennisCourtHeatmap('courtHeatmap', {
+                width: 400,
+                height: 600
+            });
+            
+            // Setup heatmap controls
+            this.setupHeatmapControls();
+        }
+        
+        // Initialize Stroke Replay Animator
+        const replayContainer = document.getElementById('strokeReplayContainer');
+        if (replayContainer) {
+            this.strokeReplayAnimator = new StrokeReplayAnimator('strokeReplayContainer', {
+                width: 800,
+                height: 500
+            });
+            
+            // Setup replay controls
+            this.setupReplayControls();
+        }
+    }
+    
+    toggleAdvancedAnalytics() {
+        this.advancedMode = !this.advancedMode;
+        const advancedSection = document.getElementById('advancedAnalytics');
+        const toggleBtn = document.getElementById('advancedToggleBtn');
+        
+        if (this.advancedMode) {
+            advancedSection.style.display = 'block';
+            toggleBtn.textContent = '✅ Advanced Analytics Active';
+            toggleBtn.classList.add('active');
+            
+            // Load data into advanced components if analysis exists
+            if (this.currentResults) {
+                this.loadAdvancedAnalytics(this.currentResults);
+            }
+            
+            this.showNotification('🚀 Advanced analytics unlocked!', 'success');
+        } else {
+            advancedSection.style.display = 'none';
+            toggleBtn.textContent = '🚀 Unlock Advanced Analytics';
+            toggleBtn.classList.remove('active');
+        }
+    }
+    
+    setupHeatmapControls() {
+        const filterSelect = document.getElementById('heatmapFilter');
+        const zoneBtn = document.getElementById('heatmapZoneBtn');
+        const exportBtn = document.getElementById('heatmapExportBtn');
+        
+        if (filterSelect) {
+            filterSelect.addEventListener('change', (e) => {
+                this.filterHeatmapData(e.target.value);
+            });
+        }
+        
+        if (zoneBtn) {
+            zoneBtn.addEventListener('click', () => {
+                this.analyzeSelectedZone();
+            });
+        }
+        
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                if (this.heatmapVisualizer) {
+                    this.heatmapVisualizer.exportAsImage();
+                }
+            });
+        }
+        
+        // Setup heatmap zone selection callback
+        if (this.heatmapVisualizer) {
+            this.heatmapVisualizer.onZoneSelected = (zone) => {
+                this.displayZoneAnalysis(zone);
+            };
+        }
+    }
+    
+    setupReplayControls() {
+        const strokeSelector = document.getElementById('strokeSelector');
+        
+        if (strokeSelector) {
+            strokeSelector.addEventListener('change', (e) => {
+                const strokeIndex = parseInt(e.target.value);
+                if (!isNaN(strokeIndex) && this.currentResults) {
+                    const stroke = this.currentResults.stroke_events[strokeIndex];
+                    if (stroke && this.strokeReplayAnimator) {
+                        this.strokeReplayAnimator.loadStrokeData(stroke);
+                    }
+                }
+            });
+        }
+    }
+    
+    loadAdvancedAnalytics(results) {
+        // Load data into pattern search engine
+        if (this.patternSearchEngine) {
+            this.patternSearchEngine.loadData(
+                results.stroke_events || [],
+                results.analytics?.rally_analysis?.rallies || []
+            );
+        }
+        
+        // Load heatmap data
+        if (this.heatmapVisualizer && results.analytics?.heatmap_analysis) {
+            const heatmapData = this.convertToHeatmapFormat(results.analytics.heatmap_analysis);
+            this.heatmapVisualizer.updateHeatmap(heatmapData);
+        }
+        
+        // Populate stroke selector
+        this.populateStrokeSelector(results.stroke_events || []);
+        
+        // Update pattern analysis cards
+        this.updatePatternAnalysisCards(results);
+    }
+    
+    convertToHeatmapFormat(heatmapAnalysis) {
+        // Convert backend heatmap data to frontend format
+        const positions = heatmapAnalysis.positions || [];
+        return positions.map(pos => ({
+            x: pos.x || 0.5,
+            y: pos.y || 0.8,
+            intensity: pos.intensity || 1,
+            strokeCount: pos.stroke_count || 1,
+            zone: pos.zone || 'unknown'
+        }));
+    }
+    
+    populateStrokeSelector(strokeEvents) {
+        const selector = document.getElementById('strokeSelector');
+        if (!selector) return;
+        
+        selector.innerHTML = '<option value="">Choose a stroke...</option>';
+        
+        strokeEvents.forEach((stroke, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${stroke.stroke_type} at ${stroke.contact_time.toFixed(1)}s (${(stroke.confidence * 100).toFixed(0)}%)`;
+            selector.appendChild(option);
+        });
+    }
+    
+    filterHeatmapData(strokeType) {
+        if (!this.heatmapVisualizer || !this.currentResults) return;
+        
+        let filteredEvents = this.currentResults.stroke_events || [];
+        
+        if (strokeType !== 'all') {
+            filteredEvents = filteredEvents.filter(stroke => 
+                stroke.stroke_type === strokeType
+            );
+        }
+        
+        // Convert to heatmap format and update
+        const heatmapData = filteredEvents.map(stroke => ({
+            x: stroke.player_position?.[0] || 0.5,
+            y: stroke.player_position?.[1] || 0.8,
+            intensity: stroke.confidence || 0.5,
+            strokeCount: 1,
+            zone: stroke.court_zone || 'unknown'
+        }));
+        
+        this.heatmapVisualizer.animateHeatmapUpdate(heatmapData);
+    }
+    
+    handleSearchResults(event) {
+        const { type, data, visualizations } = event.detail;
+        
+        // Handle different types of search results
+        if (visualizations.includes('heatmap') && this.heatmapVisualizer) {
+            // Update heatmap with search results
+            if (data.positions) {
+                this.heatmapVisualizer.updateHeatmap(data.positions);
+            }
+        }
+        
+        if (visualizations.includes('timeline') && data.strokes) {
+            // Highlight strokes on timeline
+            this.highlightTimelineStrokes(data.strokes);
+        }
     }
     
     showNotification(message, type = 'info') {

@@ -516,6 +516,188 @@
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
         }
+        
+        /* Advanced Analytics Components */
+        .advanced-analytics-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .analytics-component {
+            background: var(--surface-elevated);
+            border-radius: var(--radius-large);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+        
+        .analytics-component h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        
+        .heatmap-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .heatmap-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .filter-select, .stroke-select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .replay-container {
+            margin-bottom: 20px;
+        }
+        
+        .replay-stroke-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .replay-stroke-selector label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .pattern-analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .pattern-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        .pattern-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        .court-3d-container {
+            height: 400px;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            border-radius: var(--radius-large);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+        }
+        
+        .court-3d-placeholder {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        .placeholder-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .placeholder-text {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .placeholder-subtext {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        /* Advanced Analytics Toggle */
+        .advanced-toggle {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .advanced-toggle-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-large);
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.3);
+        }
+        
+        .advanced-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 122, 255, 0.4);
+        }
+        
+        .advanced-toggle-btn.active {
+            background: linear-gradient(135deg, var(--success), #28a745);
+        }
+        
+        /* Responsive adjustments for advanced components */
+        @media (max-width: 768px) {
+            .analytics-component {
+                padding: 20px;
+            }
+            
+            .pattern-analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .heatmap-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-btn {
+                width: 100%;
+            }
+            
+            .court-3d-container {
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -670,6 +852,16 @@
                     <div class="ai-summary" id="aiSummary">Loading insights...</div>
                     <div class="recommendations" id="recommendations"></div>
                 </div>
+                
+                <!-- Advanced Analytics Toggle -->
+                <div class="advanced-toggle">
+                    <button class="advanced-toggle-btn" id="advancedToggleBtn">
+                        🚀 Unlock Advanced Analytics
+                    </button>
+                    <p style="margin-top: 12px; color: var(--text-secondary); font-size: 14px;">
+                        Interactive heatmaps, stroke replay, natural language search & more
+                    </p>
+                </div>
             </section>
         </div>
     </main>
@@ -681,7 +873,80 @@
         <div class="loading-progress" id="loadingProgress">Initializing...</div>
     </div>
 
+    <!-- Advanced Visualization Components -->
+    <div id="advancedAnalytics" class="advanced-analytics-section" style="display: none;">
+        <!-- Pattern Search Engine -->
+        <div id="patternSearchContainer" class="analytics-component"></div>
+        
+        <!-- Interactive Heatmap -->
+        <div class="analytics-component">
+            <h3>🔥 Court Position Heatmap</h3>
+            <div id="courtHeatmap" class="heatmap-container"></div>
+            <div class="heatmap-controls">
+                <button class="control-btn" id="heatmapZoneBtn">Analyze Zone</button>
+                <button class="control-btn" id="heatmapExportBtn">Export Heatmap</button>
+                <select id="heatmapFilter" class="filter-select">
+                    <option value="all">All Strokes</option>
+                    <option value="forehand">Forehands</option>
+                    <option value="backhand">Backhands</option>
+                    <option value="serve">Serves</option>
+                    <option value="volley">Volleys</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Stroke Replay Animator -->
+        <div class="analytics-component">
+            <h3>🎾 Stroke Replay Analysis</h3>
+            <div id="strokeReplayContainer" class="replay-container"></div>
+            <div class="replay-stroke-selector">
+                <label>Select Stroke to Replay:</label>
+                <select id="strokeSelector" class="stroke-select">
+                    <option value="">Choose a stroke...</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Advanced Pattern Analysis -->
+        <div class="analytics-component">
+            <h3>📊 Advanced Pattern Analysis</h3>
+            <div class="pattern-analysis-grid">
+                <div class="pattern-card">
+                    <h4>🎯 Shot Tendencies</h4>
+                    <div id="shotTendencies">Loading...</div>
+                </div>
+                <div class="pattern-card">
+                    <h4>⚡ Pressure Performance</h4>
+                    <div id="pressurePerformance">Loading...</div>
+                </div>
+                <div class="pattern-card">
+                    <h4>📈 Improvement Trends</h4>
+                    <div id="improvementTrends">Loading...</div>
+                </div>
+                <div class="pattern-card">
+                    <h4>🏟️ Court Coverage</h4>
+                    <div id="courtCoverage">Loading...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 3D Court Visualization -->
+        <div class="analytics-component">
+            <h3>🌐 3D Court Analysis</h3>
+            <div id="court3D" class="court-3d-container">
+                <div class="court-3d-placeholder">
+                    <div class="placeholder-icon">🎾</div>
+                    <div class="placeholder-text">3D Court Visualization</div>
+                    <div class="placeholder-subtext">Interactive 3D analysis coming soon</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
+    <script src="heatmap-visualizer.js"></script>
+    <script src="stroke-replay-animator.js"></script>
+    <script src="pattern-search-engine.js"></script>
     <script src="tennisviz-app.js"></script>
 </body>
 </html>

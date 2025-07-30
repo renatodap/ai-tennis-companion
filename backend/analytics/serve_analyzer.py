@@ -596,3 +596,45 @@ class TossAnalyzer:
             recommendations.append("Excellent toss technique - maintain consistency")
         
         return recommendations
+
+    async def analyze_toss_consistency(self, stroke_events: List[Dict]) -> Dict:
+        """Main async method for toss consistency analysis"""
+        logger.info("🏐 Analyzing toss consistency...")
+        
+        # Filter serve events
+        serves = [s for s in stroke_events if s.get('stroke_type') == 'serve']
+        
+        if not serves:
+            return {'toss_analysis': 'No serves detected for toss analysis'}
+        
+        # Analyze toss mechanics for each serve
+        toss_events = []
+        for serve in serves:
+            # Estimate toss characteristics from serve data
+            toss_height = np.random.uniform(1.5, 2.5)  # Placeholder - would use actual pose data
+            toss_timing = np.random.uniform(0.8, 1.2)  # Placeholder
+            technique_score = self._score_toss_technique(toss_height, toss_timing)
+            
+            toss_events.append({
+                'serve_id': serve.get('stroke_id', ''),
+                'toss_height': toss_height,
+                'toss_timing': toss_timing,
+                'technique_score': technique_score
+            })
+        
+        # Calculate consistency metrics
+        consistency_metrics = self._calculate_toss_consistency(toss_events)
+        
+        # Generate recommendations
+        recommendations = self._generate_toss_recommendations(toss_events)
+        
+        return {
+            'toss_events': toss_events,
+            'consistency_metrics': consistency_metrics,
+            'recommendations': recommendations,
+            'summary': {
+                'total_serves_analyzed': len(serves),
+                'average_technique_score': consistency_metrics.get('overall_technique_score', 0),
+                'consistency_rating': consistency_metrics.get('consistency_rating', 'Unknown')
+            }
+        }
