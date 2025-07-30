@@ -5,7 +5,7 @@ import traceback
 from typing import Tuple
 import json
 from .classify_strokes import classify_strokes, group_strokes
-from .yolo_tennis_detector import analyze_video_yolo
+from .professional_tennis_analyzer import analyze_video_professional
 
 logger = logging.getLogger(__name__)
 
@@ -120,10 +120,10 @@ def process_video_analysis(video_path: str, output_dir: str) -> dict:
     """Process video using advanced YOLO + motion analysis"""
     
     try:
-        logger.info(f"Starting advanced YOLO analysis for: {video_path}")
+        logger.info(f"Starting professional tennis analysis for: {video_path}")
         
-        # Use advanced YOLO + motion analysis
-        results = analyze_video_yolo(video_path)
+        # Use professional-grade analysis (TennisViz-style)
+        results = analyze_video_professional(video_path)
         
         # Add additional metadata
         cap = cv2.VideoCapture(video_path)
@@ -142,7 +142,7 @@ def process_video_analysis(video_path: str, output_dir: str) -> dict:
                 'duration': stroke['duration'],
                 'confidence': stroke['confidence'],
                 'technique': stroke.get('technique', 'Advanced stroke analysis'),
-                'analysis_method': 'YOLO + Motion Analysis'
+                'analysis_method': 'Professional Context Analysis'
             }
             enhanced_timeline.append(enhanced_stroke)
         
@@ -152,13 +152,13 @@ def process_video_analysis(video_path: str, output_dir: str) -> dict:
             "timeline": enhanced_timeline,
             "fps": fps,
             "total_frames": total_frames,
-            "analysis_method": "YOLO + Motion Analysis",
+            "analysis_method": "Professional Context Analysis",
             "summary": results.get('summary', {}),
             "video_info": results.get('video_info', {})
         }
         
     except Exception as e:
-        logger.error(f"YOLO analysis failed, falling back to MediaPipe: {e}")
+        logger.error(f"Professional analysis failed, falling back to MediaPipe: {e}")
         
         # Fallback to MediaPipe if YOLO fails
         return process_video_analysis_mediapipe(video_path, output_dir)

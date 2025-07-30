@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-import torch
-from ultralytics import YOLO
 from typing import Dict, List, Tuple, Optional
 import logging
 from dataclasses import dataclass
@@ -12,6 +10,9 @@ from collections import deque
 import math
 
 logger = logging.getLogger(__name__)
+
+# Simplified tennis detector without YOLO dependency for now
+# Focus on motion analysis and accurate stroke detection
 
 class StrokeType(Enum):
     FOREHAND = "forehand"
