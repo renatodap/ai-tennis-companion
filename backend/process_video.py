@@ -3,6 +3,9 @@ import os
 import logging
 import traceback
 from typing import Tuple
+import json
+from .classify_strokes import classify_strokes, group_strokes
+from .yolo_tennis_detector import analyze_video_yolo
 
 logger = logging.getLogger(__name__)
 
@@ -112,5 +115,121 @@ def extract_frames(video_path: str, output_dir: str, max_frames: int = 150) -> T
                 logger.info("Video capture resources released")
             except Exception as e:
                 logger.warning(f"Error releasing video capture: {str(e)}")
+
+def process_video_analysis(video_path: str, output_dir: str) -> dict:
+    """Process video using advanced YOLO + motion analysis"""
+    
+    try:
+        logger.info(f"Starting advanced YOLO analysis for: {video_path}")
+        
+        # Use advanced YOLO + motion analysis
+        results = analyze_video_yolo(video_path)
+        
+        # Add additional metadata
+        cap = cv2.VideoCapture(video_path)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        cap.release()
+        
+        # Enhance timeline with additional data
+        enhanced_timeline = []
+        for stroke in results['timeline']:
+            enhanced_stroke = {
+                'id': stroke['id'],
+                'stroke': stroke['stroke'],
+                'start_sec': stroke['start_sec'],
+                'end_sec': stroke['end_sec'],
+                'duration': stroke['duration'],
+                'confidence': stroke['confidence'],
+                'technique': stroke.get('technique', 'Advanced stroke analysis'),
+                'analysis_method': 'YOLO + Motion Analysis'
+            }
+            enhanced_timeline.append(enhanced_stroke)
+        
+        logger.info(f"YOLO analysis complete. Found {len(enhanced_timeline)} strokes")
+        
+        return {
+            "timeline": enhanced_timeline,
+            "fps": fps,
+            "total_frames": total_frames,
+            "analysis_method": "YOLO + Motion Analysis",
+            "summary": results.get('summary', {}),
+            "video_info": results.get('video_info', {})
+        }
+        
+    except Exception as e:
+        logger.error(f"YOLO analysis failed, falling back to MediaPipe: {e}")
+        
+        # Fallback to MediaPipe if YOLO fails
+        return process_video_analysis_mediapipe(video_path, output_dir)
+
+def process_video_analysis_mediapipe(video_path: str, output_dir: str) -> dict:
+    """Fallback MediaPipe processing"""
+    import mediapipe as mp
+    
+    mp_pose = mp.solutions.pose
+    pose = mp_pose.Pose(
+        static_image_mode=False,
+        model_complexity=1,
+        enable_segmentation=False,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5
+    )
+    
+    cap = cv2.VideoCapture(video_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_count = 0
+    keypoints_data = {}
+    
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        
+        # Convert BGR to RGB
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Process with MediaPipe
+        results = pose.process(rgb_frame)
+        
+        frame_name = f"frame_{frame_count:04d}.jpg"
+        
+        if results.pose_landmarks:
+            # Extract keypoints
+            landmarks = []
+            for landmark in results.pose_landmarks.landmark:
+                landmarks.append({
+                    "x": landmark.x,
+                    "y": landmark.y,
+                    "z": landmark.z,
+                    "visibility": landmark.visibility
+                })
+            keypoints_data[frame_name] = landmarks
+        else:
+            keypoints_data[frame_name] = []
+        
+        frame_count += 1
+    
+    cap.release()
+    pose.close()
+    
+    # Save keypoints
+    keypoints_path = os.path.join(output_dir, "keypoints.json")
+    with open(keypoints_path, "w") as f:
+        json.dump(keypoints_data, f)
+    
+    # Classify strokes
+    strokes = classify_strokes(keypoints_path)
+    
+    # Group strokes into timeline
+    timeline = group_strokes(strokes, fps)
+    
+    return {
+        "timeline": timeline,
+        "fps": fps,
+        "total_frames": frame_count,
+        "keypoints_file": keypoints_path,
+        "analysis_method": "MediaPipe (Fallback)"
+    }
 
 
