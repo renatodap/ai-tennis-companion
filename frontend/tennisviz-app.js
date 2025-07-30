@@ -108,29 +108,44 @@ class TennisVizApp {
     
     handleFileSelect(e) {
         const file = e.target.files[0];
+        console.log('File selected:', file);
         if (file) {
             this.selectFile(file);
         }
     }
     
     selectFile(file) {
+        console.log('selectFile called with:', file);
+        
         if (!file || !file.type.startsWith('video/')) {
             this.showNotification('Please select a valid video file', 'error');
             return;
         }
         
         this.selectedFile = file;
+        console.log('File stored:', this.selectedFile);
         
         // Update UI
         const uploadText = document.querySelector('.upload-text');
         const uploadHint = document.querySelector('.upload-hint');
         const analyzeBtn = document.getElementById('analyzeBtn');
         
-        if (uploadText) uploadText.textContent = `Selected: ${file.name}`;
-        if (uploadHint) uploadHint.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Ready to analyze`;
+        console.log('UI elements found:', { uploadText, uploadHint, analyzeBtn });
+        
+        if (uploadText) {
+            uploadText.textContent = `Selected: ${file.name}`;
+            console.log('Updated upload text');
+        }
+        if (uploadHint) {
+            uploadHint.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Ready to analyze`;
+            console.log('Updated upload hint');
+        }
         if (analyzeBtn) {
             analyzeBtn.disabled = false;
             analyzeBtn.innerHTML = '<span>🎾 Analyze Tennis Video</span>';
+            console.log('Button enabled and text updated');
+        } else {
+            console.error('analyzeBtn not found!');
         }
         
         this.showNotification('Video file selected successfully!', 'success');
