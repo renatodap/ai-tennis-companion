@@ -166,7 +166,13 @@ class TennisVizApp {
         // Update UI with retry logic
         this.updateUploadUI(file);
         
-        this.showNotification('Video file selected successfully!', 'success');
+        // Show upload success notification
+        this.showNotification('Video uploaded! Starting analysis...', 'success');
+        
+        // Automatically start analysis after a brief delay to show the upload success
+        setTimeout(() => {
+            this.startAnalysis();
+        }, 1000);
     }
     
     updateUploadUI(file) {
@@ -192,15 +198,12 @@ class TennisVizApp {
                 
                 // Update text content
                 uploadText.textContent = `✅ ${file.name}`;
-                uploadHint.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Ready to analyze`;
+                uploadHint.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Analysis starting...`;
                 
-                // Enable and update analyze button
-                analyzeBtn.disabled = false;
-                analyzeBtn.innerHTML = '<span>🎾 Analyze Tennis Video</span>';
-                analyzeBtn.style.background = 'var(--primary)';
-                analyzeBtn.style.opacity = '1';
+                // Hide the analyze button since analysis starts automatically
+                analyzeBtn.style.display = 'none';
                 
-                console.log('UI successfully updated!');
+                console.log('UI successfully updated for auto-analysis!');
                 return true;
             } else {
                 console.warn('Some UI elements not found, retrying...');
@@ -254,11 +257,23 @@ class TennisVizApp {
             return;
         }
         
-        console.log('🎾 Starting analysis with file:', this.selectedFile.name);
+        console.log('🎾 Starting automatic analysis with file:', this.selectedFile.name);
+        
+        // Update upload area to show analysis in progress
+        const uploadHint = document.querySelector('.upload-hint');
+        if (uploadHint) {
+            uploadHint.textContent = `${(this.selectedFile.size / 1024 / 1024).toFixed(1)} MB • Analyzing video...`;
+        }
         
         const loadingOverlay = document.getElementById('loadingOverlay');
         if (loadingOverlay) {
             loadingOverlay.style.display = 'flex';
+        }
+        
+        // Update loading text
+        const loadingProgress = document.getElementById('loadingProgress');
+        if (loadingProgress) {
+            loadingProgress.textContent = 'Processing your tennis video...';
         }
         
         try {
