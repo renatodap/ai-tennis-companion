@@ -29,7 +29,7 @@ class TennisVizApp {
     initializeEventListeners() {
         // File upload
         const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
+        const fileInput = document.getElementById('videoInput');
         
         uploadArea.addEventListener('click', () => fileInput.click());
         uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
@@ -114,22 +114,26 @@ class TennisVizApp {
     }
     
     selectFile(file) {
-        if (!file.type.startsWith('video/')) {
-            this.showNotification('Please select a video file', 'error');
+        if (!file || !file.type.startsWith('video/')) {
+            this.showNotification('Please select a valid video file', 'error');
             return;
         }
         
         this.selectedFile = file;
-        const fileSize = (file.size / (1024 * 1024)).toFixed(1);
         
-        document.getElementById('uploadArea').innerHTML = `
-            <div class="upload-icon">✅</div>
-            <div class="upload-text">${file.name}</div>
-            <div class="upload-subtext">${fileSize}MB • Ready for analysis</div>
-        `;
+        // Update UI
+        const uploadText = document.querySelector('.upload-text');
+        const uploadHint = document.querySelector('.upload-hint');
+        const analyzeBtn = document.getElementById('analyzeBtn');
         
-        document.getElementById('analyzeBtn').disabled = false;
-        this.showNotification('Video loaded successfully!', 'success');
+        if (uploadText) uploadText.textContent = `Selected: ${file.name}`;
+        if (uploadHint) uploadHint.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Ready to analyze`;
+        if (analyzeBtn) {
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '<span>🎾 Analyze Tennis Video</span>';
+        }
+        
+        this.showNotification('Video file selected successfully!', 'success');
     }
     
     handleSessionTypeChange(e) {
