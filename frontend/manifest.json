@@ -1,27 +1,27 @@
 {
-  "name": "Tennis AI - Stroke Analysis",
-  "short_name": "Tennis AI",
-  "description": "AI-powered tennis stroke analysis for improving your game",
-  "start_url": "/",
+  "name": "TennisViz - Elite Tennis Analytics",
+  "short_name": "TennisViz",
+  "description": "Professional tennis analysis with AI-powered insights and coaching recommendations. Mobile-first PWA for technique and tactical analysis.",
+  "start_url": "/tennisviz-app.html",
   "display": "standalone",
-  "background_color": "#1e40af",
-  "theme_color": "#1e40af",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "background_color": "#f5f5f7",
+  "theme_color": "#007aff",
+  "categories": ["sports", "fitness", "analytics", "education"],
   "lang": "en",
-  "categories": ["sports", "fitness", "productivity"],
+  "scope": "/",
   "icons": [
     {
-      "src": "icons/icon-72x72.png",
+      "src": "icons/icon-72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
-      "src": "icons/icon-96x96.png",
+      "src": "icons/icon-96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-128x128.png",

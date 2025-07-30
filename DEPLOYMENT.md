@@ -1,4 +1,48 @@
-# 🎾 Tennis AI - Deployment Guide
+# 🎾 TennisViz Analytics - Deployment Guide
+
+## Ensuring Correct HTML Page on Render
+
+### Problem
+Render might serve the old `index.html` instead of the new `tennisviz-app.html` PWA.
+
+### Solution
+The deployment is configured to automatically serve the TennisViz PWA:
+
+### 1. **File Structure**
+```
+ai-tennis-deploy/
+├── backend/
+│   ├── tennisviz_api.py          # Main FastAPI app with proper routing
+│   └── analytics/                # Analytics modules
+├── frontend/
+│   ├── tennisviz-app.html        # Main TennisViz PWA (THIS gets served)
+│   ├── index.html.backup         # Old file (automatically backed up)
+│   ├── manifest.json             # PWA manifest
+│   └── sw.js                     # Service worker
+├── start.py                      # Startup script (handles routing)
+├── render.yaml                   # Render configuration
+└── requirements.txt              # Dependencies
+```
+
+### 2. **Automatic Routing Setup**
+The FastAPI backend (`tennisviz_api.py`) includes these routes:
+
+```python
+@app.get("/")
+async def root():
+    return FileResponse("frontend/tennisviz-app.html")  # Serves TennisViz PWA
+
+@app.get("/index.html")
+async def serve_index():
+    return FileResponse("frontend/tennisviz-app.html")  # Redirects to TennisViz PWA
+```
+
+### 3. **Startup Script Protection**
+The `start.py` script automatically:
+- Backs up old `index.html` to prevent conflicts
+- Verifies `tennisviz-app.html` exists
+- Sets up proper Python paths
+- Starts the server with correct configuration
 
 ## Overview
 Your Tennis AI app is now a modern Progressive Web App (PWA) with a stellar mobile-first design that works seamlessly across web, iOS, and Android platforms.
