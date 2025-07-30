@@ -27,34 +27,66 @@ class TennisVizApp {
     }
     
     initializeEventListeners() {
+        // Wait for DOM to be fully loaded before setting up event listeners
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setupFileUploadListeners());
+        } else {
+            this.setupFileUploadListeners();
+        }
+        
+        this.setupOtherListeners();
+    }
+    
+    setupFileUploadListeners() {
         // File upload
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('videoInput');
         
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
-        uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
-        uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+        console.log('Setting up file upload listeners:', { uploadArea, fileInput });
         
-        fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        if (uploadArea && fileInput) {
+            uploadArea.addEventListener('click', () => {
+                console.log('Upload area clicked, triggering file input');
+                fileInput.click();
+            });
+            uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+            uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
+            uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+            
+            fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        } else {
+            console.error('Upload elements not found:', { uploadArea, fileInput });
+        }
+    }
+    
+    setupOtherListeners() {
         
-        // Session type buttons
-        document.querySelectorAll('.session-btn').forEach(btn => {
-            btn.addEventListener('click', this.handleSessionTypeChange.bind(this));
+        // Session type buttons (using radio buttons instead of .session-btn)
+        document.querySelectorAll('input[name="sessionType"]').forEach(radio => {
+            radio.addEventListener('change', this.handleSessionTypeChange.bind(this));
         });
         
-        // Analysis options
-        document.querySelectorAll('.option-card').forEach(card => {
-            card.addEventListener('click', this.handleOptionSelect.bind(this));
+        // Camera view options
+        document.querySelectorAll('input[name="cameraView"]').forEach(radio => {
+            radio.addEventListener('change', this.handleOptionSelect.bind(this));
+        });
+        
+        // Analysis mode options
+        document.querySelectorAll('input[name="analysisMode"]').forEach(radio => {
+            radio.addEventListener('change', this.handleOptionSelect.bind(this));
         });
         
         // Analyze button
         const analyzeBtn = document.getElementById('analyzeBtn');
-        analyzeBtn.addEventListener('click', this.startAnalysis.bind(this));
+        if (analyzeBtn) {
+            analyzeBtn.addEventListener('click', this.startAnalysis.bind(this));
+        }
         
         // Export button
         const exportBtn = document.getElementById('exportBtn');
-        exportBtn.addEventListener('click', this.exportResults.bind(this));
+        if (exportBtn) {
+            exportBtn.addEventListener('click', this.exportResults.bind(this));
+        }
         
         // Advanced analytics toggle
         const advancedToggleBtn = document.getElementById('advancedToggleBtn');
@@ -63,16 +95,22 @@ class TennisVizApp {
         }
         
         // Initialize advanced components when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initializeAdvancedComponents();
+            });
+        } else {
             this.initializeAdvancedComponents();
-        });
+        }
         
         // Listen for search results
         document.addEventListener('tennisSearchResults', this.handleSearchResults.bind(this));
-        document.getElementById('exportBtn').addEventListener('click', this.exportResults.bind(this));
         
         // Timeline controls
-        document.getElementById('playBtn').addEventListener('click', this.togglePlayback.bind(this));
+        const playBtn = document.getElementById('playBtn');
+        if (playBtn) {
+            playBtn.addEventListener('click', this.togglePlayback.bind(this));
+        }
     }
     
     async initializeServiceWorker() {
@@ -125,44 +163,89 @@ class TennisVizApp {
         this.selectedFile = file;
         console.log('File stored:', this.selectedFile);
         
-        // Update UI
-        const uploadText = document.querySelector('.upload-text');
-        const uploadHint = document.querySelector('.upload-hint');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        
-        console.log('UI elements found:', { uploadText, uploadHint, analyzeBtn });
-        
-        if (uploadText) {
-            uploadText.textContent = `Selected: ${file.name}`;
-            console.log('Updated upload text');
-        }
-        if (uploadHint) {
-            uploadHint.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Ready to analyze`;
-            console.log('Updated upload hint');
-        }
-        if (analyzeBtn) {
-            analyzeBtn.disabled = false;
-            analyzeBtn.innerHTML = '<span>🎾 Analyze Tennis Video</span>';
-            console.log('Button enabled and text updated');
-        } else {
-            console.error('analyzeBtn not found!');
-        }
+        // Update UI with retry logic
+        this.updateUploadUI(file);
         
         this.showNotification('Video file selected successfully!', 'success');
     }
     
+    updateUploadUI(file) {
+        // Retry finding elements if not found initially
+        const maxRetries = 5;
+        let retryCount = 0;
+        
+        const updateElements = () => {
+            const uploadText = document.querySelector('.upload-text');
+            const uploadHint = document.querySelector('.upload-hint');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const uploadArea = document.getElementById('uploadArea');
+            
+            console.log('UI elements found (attempt ' + (retryCount + 1) + '):', { uploadText, uploadHint, analyzeBtn, uploadArea });
+            
+            if (uploadText && uploadHint && analyzeBtn) {
+                // Update upload area appearance
+                if (uploadArea) {
+                    uploadArea.style.background = 'linear-gradient(135deg, #34c759, #28a745)';
+                    uploadArea.style.borderColor = '#34c759';
+                    uploadArea.style.color = 'white';
+                }
+                
+                // Update text content
+                uploadText.textContent = `✅ ${file.name}`;
+                uploadHint.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Ready to analyze`;
+                
+                // Enable and update analyze button
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<span>🎾 Analyze Tennis Video</span>';
+                analyzeBtn.style.background = 'var(--primary)';
+                analyzeBtn.style.opacity = '1';
+                
+                console.log('UI successfully updated!');
+                return true;
+            } else {
+                console.warn('Some UI elements not found, retrying...');
+                return false;
+            }
+        };
+        
+        // Try immediately
+        if (updateElements()) {
+            return;
+        }
+        
+        // Retry with delays if initial attempt failed
+        const retryUpdate = () => {
+            retryCount++;
+            if (retryCount < maxRetries) {
+                setTimeout(() => {
+                    if (!updateElements()) {
+                        retryUpdate();
+                    }
+                }, 100 * retryCount); // Increasing delay
+            } else {
+                console.error('Failed to update UI after', maxRetries, 'attempts');
+            }
+        };
+        
+        retryUpdate();
+    }
+    
     handleSessionTypeChange(e) {
-        document.querySelectorAll('.session-btn').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
-        this.sessionType = e.target.dataset.type;
+        this.sessionType = e.target.value;
+        console.log('Session type changed to:', this.sessionType);
     }
     
     handleOptionSelect(e) {
-        document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
-        e.currentTarget.classList.add('selected');
+        const name = e.target.name;
+        const value = e.target.value;
         
-        this.cameraView = e.currentTarget.dataset.view;
-        this.analysisMode = e.currentTarget.dataset.mode;
+        if (name === 'cameraView') {
+            this.cameraView = value;
+            console.log('Camera view changed to:', this.cameraView);
+        } else if (name === 'analysisMode') {
+            this.analysisMode = value;
+            console.log('Analysis mode changed to:', this.analysisMode);
+        }
     }
     
     async startAnalysis() {
